@@ -46,8 +46,8 @@ class CleanHtmlDocumentToHtmlOnly(Base):
         
                 for tag in soup.select('script'):
                     tag.decompose()
-        
-                html_only_document = self.html_only_repository.create()
+
+                html_only_document = self.html_only_repository.create(id=raw_document.id)
                 html_only_document.contents = str(soup)
                 self.html_only_repository.update(html_only_document)
         
