@@ -10,7 +10,7 @@ from daos import (
     HtmlDocumentIndexItem as Index,
 )
 
-from .base import BaseDataProcessingService as Base
+from .abstract import AbstractMultiThreadedDataProcessingService as Base
 
 
 class SyncHtmlToHtmlOnly(Base):
@@ -26,7 +26,7 @@ class SyncHtmlToHtmlOnly(Base):
         self.raw_repository = raw_repository
         self.lock = threading.Lock()
 
-    def run_in_thread(self, item):
+    def _run_in_thread(self, item):
         try:
             raw_document = self.raw_repository.get(item.document_id)
 
@@ -62,28 +62,12 @@ class SyncHtmlToHtmlOnly(Base):
                 self.failed_operations += 1
 
     def run(self, params: Dict):
-        self.reset_operation_counters()
+        self.start_run(params)
+
         items = self.index_repository.get_all_by_filter({
             Index.is_html_only_version_stored: False
         })
-        print(f'Identified {len(items)} html documents to clean ...')
-        
-        threads = []
 
-        for i, item in enumerate(items):
-            print(f'Running in thread ... {i + 1}')
-            thread = threading.Thread(target=self.run_in_thread, args=(item,))
-            thread.start()
-            threads.append(thread)
+        self._run_concurrently_in_threads(items)
 
-            while threading.active_count() >= 20:
-                time.sleep(1)
-
-        for thread in threads:
-            thread.join()
-
-        return {
-            'status': 'DONE',
-            'successful_operations': self.successful_operations,
-            'failed_operations': self.failed_operations
-        }
+        return self.end_run()
