@@ -12,13 +12,18 @@ from data_processing_services.services import *
 
 
 REPOSITORIES = [
-    service(GoogleSearchResultsHtmlDocumentRawRepository),
-    service(GoogleSearchResultsHtmlDocumentIndexRepository),
-    service(GoogleSearchResultsHtmlDocumentHtmlOnlyRepository),
-    service(GoogleSearchResultsHtmlDocumentNoJSRepository),
+    GoogleSearchResultsHtmlDocumentRawRepository,
+    GoogleSearchResultsHtmlDocumentIndexRepository,
+    GoogleSearchResultsHtmlDocumentHtmlOnlyRepository,
+    GoogleSearchResultsHtmlDocumentNoJSRepository,
 ]
 
-SERVICES = [
-    ServiceAdapter('/clean-html-document-to-no-js', HttpMethod.POST, service(CleanHtmlDocumentToNoJs)()),
-    ServiceAdapter('/clean-html-document-to-html-only', HttpMethod.POST, service(CleanHtmlDocumentToHtmlOnly)())
+for cls in REPOSITORIES:
+    service(cls)
+
+SERVICES_PARAMS = [
+    ('/clean-html-document-to-no-js', HttpMethod.POST, CleanHtmlDocumentToNoJs),
+    ('/clean-html-document-to-html-only', HttpMethod.POST, CleanHtmlDocumentToHtmlOnly),
 ]
+
+SERVICES = [ServiceAdapter(r, m, service(s)()) for r, m, s in SERVICES_PARAMS]
