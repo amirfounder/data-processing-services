@@ -7,7 +7,10 @@ class BaseDataProcessingService(ABC):
         self.successful_operations = 0
         self.failed_operations = 0
 
-    @abstractmethod
-    def run(self, params: Dict):
+    def reset_operation_counters(self):
         self.successful_operations = 0
         self.failed_operations = 0
+
+    @abstractmethod
+    def run(self, params: Dict):
+        pass

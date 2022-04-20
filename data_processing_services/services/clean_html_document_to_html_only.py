@@ -24,6 +24,7 @@ class CleanHtmlDocumentToHtmlOnly(Base):
         self.html_only_repository = html_only_repository
         self.index_repository = index_repository
         self.raw_repository = raw_repository
+        self.lock = threading.Lock()
 
     def run_in_thread(self, item):
         try:
@@ -52,12 +53,16 @@ class CleanHtmlDocumentToHtmlOnly(Base):
             item.is_html_only_version_stored = True
             self.index_repository.update(item)
 
-            self.successful_operations += 1
+            with self.lock:
+                self.successful_operations += 1
+
         except Exception as e:
-            print(f'Exception occurred : {str(e)}. Document ID : {index.document_id}')
-            self.failed_operations += 1
+            print(f'Exception occurred : {str(e)}. Document ID : {item.document_id}')
+            with self.lock:
+                self.failed_operations += 1
 
     def run(self, params: Dict):
+        self.reset_operation_counters()
         items = self.index_repository.get_all_by_filter({
             Index.is_html_only_version_stored: False
         })
@@ -66,11 +71,12 @@ class CleanHtmlDocumentToHtmlOnly(Base):
         threads = []
 
         for i, item in enumerate(items):
-            print(f'Running in thread ... {i}')
+            print(f'Running in thread ... {i + 1}')
             thread = threading.Thread(target=self.run_in_thread, args=(item,))
             thread.start()
             threads.append(thread)
-            while len(threads) >= 25:
+
+            while threading.active_count() >= 20:
                 time.sleep(1)
 
         for thread in threads:
