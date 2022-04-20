@@ -54,12 +54,9 @@ class SyncHtmlToNoJs(Base):
                 self.failed_operations += 1
 
     def run(self, params: Dict):
-        self.start_run(params)
-
         items = self.index_repository.get_all_by_filter({
             Index.is_no_js_version_stored: False
         })
 
         self._run_concurrently_in_threads(items)
-
-        return self.end_run()
+        return self.complete()

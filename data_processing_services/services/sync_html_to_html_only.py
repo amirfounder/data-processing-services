@@ -1,5 +1,4 @@
 import threading
-import time
 from copy import copy
 from typing import Dict
 
@@ -24,7 +23,6 @@ class SyncHtmlToHtmlOnly(Base):
         self.html_only_repository = html_only_repository
         self.index_repository = index_repository
         self.raw_repository = raw_repository
-        self.lock = threading.Lock()
 
     def _run_in_thread(self, item):
         try:
@@ -62,12 +60,9 @@ class SyncHtmlToHtmlOnly(Base):
                 self.failed_operations += 1
 
     def run(self, params: Dict):
-        self.start_run(params)
-
         items = self.index_repository.get_all_by_filter({
             Index.is_html_only_version_stored: False
         })
 
         self._run_concurrently_in_threads(items)
-
-        return self.end_run()
+        return self.complete()
