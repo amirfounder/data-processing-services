@@ -22,8 +22,8 @@ for cls in REPOSITORIES:
     service(cls)
 
 SERVICES_PARAMS = [
-    ('/clean-html-document-to-no-js', HttpMethod.POST, CleanHtmlDocumentToNoJs),
-    ('/clean-html-document-to-html-only', HttpMethod.POST, CleanHtmlDocumentToHtmlOnly),
+    ('/sync-html-to-no-js', HttpMethod.POST, SyncHtmlToNoJs),
+    ('/sync-html-to-html-only', HttpMethod.POST, SyncHtmlToHtmlOnly),
 ]
 
 SERVICES = [ServiceAdapter(r, m, service(s)()) for r, m, s in SERVICES_PARAMS]

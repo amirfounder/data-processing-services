@@ -1,2 +1,2 @@
-from .clean_html_document_to_html_only import CleanHtmlDocumentToHtmlOnly
-from .clean_html_document_to_no_js import CleanHtmlDocumentToNoJs
+from .sync_html_to_html_only import SyncHtmlToHtmlOnly
+from .sync_html_to_no_js import SyncHtmlToNoJs

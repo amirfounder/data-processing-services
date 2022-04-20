@@ -5,7 +5,7 @@ from typing import Dict
 
 from daos import (
     GoogleSearchResultsHtmlDocumentRawRepository as RawRepository,
-    GoogleSearchResultsHtmlDocumentNoJSRepository as NoJsRepository,
+    GoogleSearchResultsHtmlDocumentHtmlOnlyRepository as HtmlOnlyRepository,
     GoogleSearchResultsHtmlDocumentIndexRepository as IndexRepository,
     HtmlDocumentIndexItem as Index,
 )
@@ -13,15 +13,15 @@ from daos import (
 from .base import BaseDataProcessingService as Base
 
 
-class CleanHtmlDocumentToNoJs(Base):
+class SyncHtmlToHtmlOnly(Base):
     def __init__(
             self,
-            no_js_repository: NoJsRepository,
+            html_only_repository: HtmlOnlyRepository,
             index_repository: IndexRepository,
             raw_repository: RawRepository
     ):
         super().__init__()
-        self.no_js_repository = no_js_repository
+        self.html_only_repository = html_only_repository
         self.index_repository = index_repository
         self.raw_repository = raw_repository
         self.lock = threading.Lock()
@@ -38,15 +38,19 @@ class CleanHtmlDocumentToNoJs(Base):
 
             soup = copy(raw_document.soup)
 
+            for tag in soup.find_all():
+                if hasattr(tag, 'attrs') and isinstance(tag.attrs, dict):
+                    tag.attrs.clear()
+
             for tag in soup.select('script'):
                 tag.decompose()
 
-            no_js_document = self.no_js_repository.create(id=raw_document.id)
-            no_js_document.contents = str(soup)
-            self.no_js_repository.update(no_js_document)
+            html_only_document = self.html_only_repository.create(id=raw_document.id)
+            html_only_document.contents = str(soup)
+            self.html_only_repository.update(html_only_document)
 
-            item.no_js_version_document_path = no_js_document.path
-            item.is_no_js_version_stored = True
+            item.html_only_version_document_path = html_only_document.path
+            item.is_html_only_version_stored = True
             self.index_repository.update(item)
 
             with self.lock:
@@ -60,15 +64,15 @@ class CleanHtmlDocumentToNoJs(Base):
     def run(self, params: Dict):
         self.reset_operation_counters()
         items = self.index_repository.get_all_by_filter({
-            Index.is_no_js_version_stored: False
+            Index.is_html_only_version_stored: False
         })
         print(f'Identified {len(items)} html documents to clean ...')
-
+        
         threads = []
 
         for i, item in enumerate(items):
             print(f'Running in thread ... {i + 1}')
-            thread = threading.Thread(target=self.run_in_thread, args=(item,), daemon=True)
+            thread = threading.Thread(target=self.run_in_thread, args=(item,))
             thread.start()
             threads.append(thread)
 
