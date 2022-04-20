@@ -1,8 +1,8 @@
 from daos import (
-    NewsArticleHtmlDocumentRawRepository,
-    NewsArticleHtmlDocumentHtmlOnlyRepository,
-    NewsArticleHtmlDocumentIndexRepository,
-    NewsArticleHtmlDocumentNoJsRepository
+    GoogleSearchResultsHtmlDocumentRawRepository,
+    GoogleSearchResultsHtmlDocumentHtmlOnlyRepository,
+    GoogleSearchResultsHtmlDocumentIndexRepository,
+    GoogleSearchResultsHtmlDocumentNoJSRepository,
 )
 from dependency_injection import service
 from http_server import HttpMethod
@@ -12,10 +12,10 @@ from data_processing_services.services import *
 
 
 REPOSITORIES = [
-    service(NewsArticleHtmlDocumentRawRepository),
-    service(NewsArticleHtmlDocumentIndexRepository),
-    service(NewsArticleHtmlDocumentHtmlOnlyRepository),
-    service(NewsArticleHtmlDocumentNoJsRepository),
+    service(GoogleSearchResultsHtmlDocumentRawRepository),
+    service(GoogleSearchResultsHtmlDocumentIndexRepository),
+    service(GoogleSearchResultsHtmlDocumentHtmlOnlyRepository),
+    service(GoogleSearchResultsHtmlDocumentNoJSRepository),
 ]
 
 SERVICES = [
