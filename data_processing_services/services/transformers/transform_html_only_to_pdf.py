@@ -9,9 +9,9 @@ from daos import (
     DocumentIndexModel as Index, DocumentIndexModel,
 )
 
-from .abstract import AbstractMultiThreadedDataProcessingService as Base
+from data_processing_services.services.abstract import AbstractMultiThreadedDataProcessingService as Base
 
-class SyncHtmlOnlyToPdf(Base):
+class TransformHtmlOnlyToPdf(Base):
     def __init__(
             self,
             pdfkit: PdfKit,

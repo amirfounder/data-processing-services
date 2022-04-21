@@ -8,10 +8,10 @@ from daos import (
     DocumentIndexModel as IndexModel,
 )
 
-from .abstract import AbstractMultiThreadedDataProcessingService as Base
+from data_processing_services.services.abstract import AbstractMultiThreadedDataProcessingService as Base
 
 
-class SyncHtmlToHtmlOnly(Base):
+class TransformHtmlToHtmlOnly(Base):
     def __init__(
             self,
             html_only_repository: HtmlOnlyRepository,

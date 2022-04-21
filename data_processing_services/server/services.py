@@ -6,7 +6,6 @@ from http_server import HttpMethod
 
 from data_processing_services.server.adapter import DataProcessingHttpEndpointServiceAdapter as ServiceAdapter
 from data_processing_services.services import *
-from data_processing_services.services.save_raw_html_to_pdf import SyncRawHtmlToPdf
 
 REPOSITORIES = [
     DocumentIndexRepository,
@@ -27,9 +26,10 @@ for cls in COMMON_SERVICES:
     service(cls)
 
 SERVICES_PARAMS = [
-    ('/sync-raw-html-to-pdf', HttpMethod.POST, service(SyncRawHtmlToPdf)),
-    ('/sync-html-to-html-only', HttpMethod.POST, service(SyncHtmlToHtmlOnly)),
-    ('/sync-html-only-to-pdf', HttpMethod.POST, service(SyncHtmlOnlyToPdf))
+    ('/transform-raw-html-to-pdf', HttpMethod.POST, service(TransformRawHtmlToPdf)),
+    ('/transform-html-to-html-only', HttpMethod.POST, service(TransformHtmlToHtmlOnly)),
+    ('/transform-html-only-to-pdf', HttpMethod.POST, service(TransformHtmlOnlyToPdf)),
+    ('/resync-document-index-db', HttpMethod.POST, service(ResyncDocumentIndexDb))
 ]
 
 SERVICES = [ServiceAdapter(r, m, s()) for r, m, s in SERVICES_PARAMS]
