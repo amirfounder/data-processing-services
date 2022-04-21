@@ -6,10 +6,11 @@ def threaded_try_except(func):
         try:
 
             summary = func(task)
-            summary['id'] = task.document_id
 
-            with self.lock:
-                self.report.log_success(summary)
+            if summary:
+                summary['id'] = task.document_id
+                with self.lock:
+                    self.report.log_success(summary)
 
         except Exception as e:
             print(f'Exception occurred : {str(e)}. Document ID : {task.document_id}')
@@ -27,9 +28,10 @@ def try_except(func):
         try:
 
             summary = func(task)
-            summary['id'] = task.document_id
 
-            self.report.log_success(summary)
+            if summary:
+                summary['id'] = task.document_id
+                self.report.log_success(summary)
 
         except Exception as e:
             print(f'Exception occurred : {str(e)}. Document ID : {task.document_id}')
