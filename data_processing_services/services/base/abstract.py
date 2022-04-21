@@ -2,22 +2,20 @@ from __future__ import annotations
 from abc import abstractmethod, ABC
 from typing import Dict
 
-from data_processing_services.services.abstract.service_report import ServiceReport
-
-TRUNCATED_LENGTH = 50
+from data_processing_services.services.base.report import Report
 
 
-class AbstractDataProcessingService(ABC):
-    service_suit_id = 'DataProcessingServices'
+class AbstractService(ABC):
+    service_suite_id = 'DataProcessingServices'
 
     def __new__(cls, *args, **kwargs):
         cls.service_id = cls.__name__
-        cls.service_report = ServiceReport()
+        cls.report = Report()
         return super().__new__(cls, *args, **kwargs)
 
     def complete(self):
-        report = self.service_report.complete()
-        self.service_report.reset()
+        report = self.report.finalize()
+        self.report.reset()
         return report
 
     @abstractmethod

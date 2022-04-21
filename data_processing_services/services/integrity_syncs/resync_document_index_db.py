@@ -7,7 +7,7 @@ from daos import (
     HtmlOnlyPdfDocumentRepository, DocumentIndexModel
 )
 
-from .abstract.abstract_multi_threaded import AbstractMultiThreadedDataProcessingService as Base
+from data_processing_services.services.base.abstract_threaded import AbstractThreadedService as Base
 
 
 class ResyncDocumentIndexDb(Base):
@@ -23,7 +23,7 @@ class ResyncDocumentIndexDb(Base):
         self.html_only_repository = html_only_repository
         self.html_only_pdf_repository = html_only_pdf_repository
 
-    def _run_in_thread(self, item: DocumentIndexModel):
+    def run_in_thread(self, item: DocumentIndexModel):
         try:
 
             url: str = item.url
@@ -31,7 +31,7 @@ class ResyncDocumentIndexDb(Base):
 
             if not url:
                 self.index_repository.delete(item.id)
-                self.service_report.log_failure({
+                self.report.log_failure({
                     'id': item.document_id,
                     'reason': 'No URL present. Could not clean further. Removing item from index ...'
                 })
@@ -44,7 +44,7 @@ class ResyncDocumentIndexDb(Base):
                 item.is_type_google_search_results = False
 
             if not doc_id:
-                self.service_report.log_failure({
+                self.report.log_failure({
                     'id': item.document_id,
                     'reason': 'No doc_id present. Could not clean further'
                 })
@@ -69,7 +69,7 @@ class ResyncDocumentIndexDb(Base):
                 item.is_html_only_pdf_version_stored = False
 
             self.index_repository.update(item)
-            self.service_report.log_success({
+            self.report.log_success({
                 'id': item.document_id
             })
 
@@ -77,7 +77,7 @@ class ResyncDocumentIndexDb(Base):
             print(f'Exception occurred : {str(e)}. Document ID : {item.document_id}')
 
             with self.lock:
-                self.service_report.log_failure({
+                self.report.log_failure({
                     'id': item.document_id,
                     'reason': str(e)
                 })
@@ -86,6 +86,6 @@ class ResyncDocumentIndexDb(Base):
         max_threads = params.get('max_threads', 50)
 
         items = self.index_repository.get_all()
-        self._run_concurrently_in_threads(items, max_threads=max_threads)
+        self.run_concurrently_in_threads(items, max_threads=max_threads)
 
-        return self.service_report.complete()
+        return self.report.complete()
