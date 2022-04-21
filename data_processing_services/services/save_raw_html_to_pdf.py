@@ -3,15 +3,15 @@ from typing import Dict
 from commons import PdfKit
 
 from daos import (
-    HtmlOnlyHtmlDocumentRepository as HtmlRepository,
-    HtmlOnlyPdfDocumentRepository as PdfRepository,
+    RawHtmlDocumentRepository as HtmlRepository,
+    RawHtmlPdfDocumentRepository as PdfRepository,
     DocumentIndexRepository as IndexRepository,
     DocumentIndexModel as Index, DocumentIndexModel,
 )
 
 from .abstract import AbstractMultiThreadedDataProcessingService as Base
 
-class SyncHtmlOnlyToPdf(Base):
+class SyncRawHtmlToPdf(Base):
     def __init__(
             self,
             pdfkit: PdfKit,
@@ -34,8 +34,8 @@ class SyncHtmlOnlyToPdf(Base):
             pdf_doc.contents = pdf_contents
             self.pdf_repository.update(pdf_doc)
 
-            item.html_only_pdf_version_document_path = pdf_doc.path
-            item.is_html_only_pdf_version_stored = True
+            item.raw_html_pdf_version_document_path = pdf_doc.path
+            item.is_raw_html_pdf_version_stored = True
             self.index_repository.update(item)
 
             with self.lock:
@@ -61,8 +61,7 @@ class SyncHtmlOnlyToPdf(Base):
         items = self.index_repository.get_all() \
             if sync_all \
             else self.index_repository.get_all_by_filter({
-                Index.is_html_only_pdf_version_stored: False,
-                Index.is_html_only_version_stored: True
+                Index.is_raw_html_pdf_version_stored: False
             })
 
         self._run_concurrently_in_threads(items, max_threads=max_threads)
