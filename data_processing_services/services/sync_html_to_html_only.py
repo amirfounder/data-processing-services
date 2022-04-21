@@ -36,12 +36,20 @@ class SyncHtmlToHtmlOnly(Base):
 
             soup = copy(raw_document.soup)
 
+            attributes_removed = 0
             for tag in soup.find_all():
-                if hasattr(tag, 'attrs') and isinstance(tag.attrs, dict):
-                    tag.attrs.clear()
+                tag.attrs.clear()
+                attributes_removed += 1
 
+            head_tags_removed = 0
+            for tag in soup.select('head'):
+                tag.decompose()
+                head_tags_removed += 1
+
+            script_tags_removed = 0
             for tag in soup.select('script'):
                 tag.decompose()
+                script_tags_removed += 1
 
             html_only_document = self.html_only_repository.create(id=raw_document.id)
             html_only_document.contents = str(soup)
@@ -52,17 +60,28 @@ class SyncHtmlToHtmlOnly(Base):
             self.index_repository.update(item)
 
             with self.lock:
-                self.successful_operations += 1
+                self.operations_report.log_success({
+                    'id': item.document_id,
+                    'raw_path': raw_document.path,
+                    'html_only_path': html_only_document.path,
+                    'script_tags_removed': script_tags_removed,
+                    'head_tags_removed': head_tags_removed,
+                    'attributes_removed': attributes_removed
+                })
 
         except Exception as e:
             print(f'Exception occurred : {str(e)}. Document ID : {item.document_id}')
             with self.lock:
-                self.failed_operations += 1
+                self.operations_report.log_failure({
+                    'reason': str(e)
+                })
 
     def run(self, params: Dict):
-        items = self.index_repository.get_all_by_filter({
-            Index.is_html_only_version_stored: False
-        })
+        items = self.index_repository.get_all() \
+            if params.get('sync_all', False) \
+            else self.index_repository.get_all_by_filter({
+                Index.is_html_only_version_stored: False
+            })
 
         self._run_concurrently_in_threads(items)
         return self.complete()

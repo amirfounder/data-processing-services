@@ -33,8 +33,19 @@ class SyncHtmlToNoJs(Base):
 
                 soup = copy(raw_document.soup)
 
+                script_tags_removed = 0
                 for tag in soup.select('script'):
                     tag.decompose()
+                    script_tags_removed += 1
+
+                attr_values_removed = 0
+                for tag in soup.find_all():
+                    attrs_copy = {}
+                    for k, v in tag.attrs.items():
+                        if '://' not in v:
+                            attrs_copy[k] = v
+                        else:
+                            attr_values_removed += 1
 
                 no_js_document = self.no_js_repository.create(id=raw_document.id)
                 no_js_document.contents = str(soup)
@@ -45,18 +56,28 @@ class SyncHtmlToNoJs(Base):
                 self.index_repository.update(item)
 
                 with self.lock:
-                    self.successful_operations += 1
+                    self.operations_report.log_success({
+                        'id': item.document_id,
+                        'script_tags_removed': script_tags_removed,
+                        'attrs_values_removed': {
+                            '://': attr_values_removed
+                        }
+                    })
 
         except Exception as e:
             print(f'Exception occurred : {str(e)}. Document ID : {item.document_id}')
 
             with self.lock:
-                self.failed_operations += 1
+                self.operations_report.log_failure({
+                    'reason': str(e)
+                })
 
     def run(self, params: Dict):
-        items = self.index_repository.get_all_by_filter({
-            Index.is_no_js_version_stored: False
-        })
+        items = self.index_repository.get_all() \
+            if params.get('sync_all') \
+            else self.index_repository.get_all_by_filter({
+                Index.is_html_only_version_stored: True
+            })
 
         self._run_concurrently_in_threads(items)
         return self.complete()
