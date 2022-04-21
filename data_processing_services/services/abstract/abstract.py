@@ -16,7 +16,9 @@ class AbstractDataProcessingService(ABC):
         return super().__new__(cls, *args, **kwargs)
 
     def complete(self):
-        return self.service_report.complete()
+        report = self.service_report.complete()
+        self.service_report.reset()
+        return report
 
     @abstractmethod
     def run(self, params: Dict):

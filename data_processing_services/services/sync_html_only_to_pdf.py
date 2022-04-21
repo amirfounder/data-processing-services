@@ -6,7 +6,7 @@ from daos import (
     HtmlOnlyHtmlDocumentRepository as HtmlRepository,
     HtmlOnlyPdfDocumentRepository as PdfRepository,
     DocumentIndexRepository as IndexRepository,
-    DocumentIndexModel as Index,
+    DocumentIndexModel as Index, DocumentIndexModel,
 )
 
 from .abstract import AbstractMultiThreadedDataProcessingService as Base
@@ -25,17 +25,32 @@ class SyncHtmlOnlyToPdf(Base):
         self.index_repository = index_repository
         self.pdfkit = pdfkit
 
-    def _run_in_thread(self, item):
+    def _run_in_thread(self, item: DocumentIndexModel):
         try:
-
             html_doc = self.html_repository.get(item.document_id)
-            html_pdf = self.pdfkit.from_file(html_doc.path)
+            pdf_contents = self.pdfkit.from_file(html_doc.path)
+
+            pdf_doc = self.pdf_repository.create(identifier=html_doc.id)
+            pdf_doc.contents = pdf_contents
+            self.pdf_repository.update(pdf_doc)
+
+            item.pdf_version_document_path = pdf_doc.path
+            item.is_pdf_version_stored = True
+            self.index_repository.update(item)
+
+            with self.lock:
+                self.service_report.log_success({
+                    'id': item.document_id,
+                    'html_path': html_doc.path,
+                    'pdf_path': pdf_doc.path
+                })
 
         except Exception as e:
             print(f'Exception occurred : {str(e)}. Document ID : {item.document_id}')
 
             with self.lock:
                 self.service_report.log_failure({
+                    'id': item.document_id,
                     'reason': str(e)
                 })
 

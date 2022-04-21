@@ -25,15 +25,15 @@ class SyncHtmlToHtmlOnly(Base):
 
     def _run_in_thread(self, item):
         try:
-            raw_document = self.raw_repository.get(item.document_id)
+            raw_html_document = self.raw_repository.get(item.document_id)
 
-            if not raw_document:
+            if not raw_html_document:
                 return
 
-            raw_document.load_contents()
-            raw_document.load_soup()
+            raw_html_document.load_contents()
+            raw_html_document.load_soup()
 
-            soup = copy(raw_document.soup)
+            soup = copy(raw_html_document.soup)
 
             attributes_removed = 0
             for tag in soup.find_all():
@@ -50,7 +50,7 @@ class SyncHtmlToHtmlOnly(Base):
                 tag.decompose()
                 script_tags_removed += 1
 
-            html_only_document = self.html_only_repository.create(id=raw_document.id)
+            html_only_document = self.html_only_repository.create(identifier=raw_html_document.id)
             html_only_document.contents = str(soup)
             self.html_only_repository.update(html_only_document)
 
@@ -61,7 +61,7 @@ class SyncHtmlToHtmlOnly(Base):
             with self.lock:
                 self.service_report.log_success({
                     'id': item.document_id,
-                    'raw_path': raw_document.path,
+                    'raw_html_path': raw_html_document.path,
                     'html_only_path': html_only_document.path,
                     'script_tags_removed': script_tags_removed,
                     'head_tags_removed': head_tags_removed,
@@ -72,6 +72,7 @@ class SyncHtmlToHtmlOnly(Base):
             print(f'Exception occurred : {str(e)}. Document ID : {item.document_id}')
             with self.lock:
                 self.service_report.log_failure({
+                    'id': item.document_id,
                     'reason': str(e)
                 })
 

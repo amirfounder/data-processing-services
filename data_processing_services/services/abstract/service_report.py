@@ -4,7 +4,13 @@ from typing import Dict
 
 class ServiceReport:
     def __init__(self):
-        self.status = 'RUNNING'
+        self.status = '--'
+        self.succeeded_count = 0
+        self.failed_count = 0
+        self.summaries = []
+
+    def reset(self):
+        self.status = '--'
         self.succeeded_count = 0
         self.failed_count = 0
         self.summaries = []
