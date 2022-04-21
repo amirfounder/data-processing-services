@@ -56,8 +56,8 @@ class TransformHtmlToHtmlOnly(Base):
         html_only_document.contents = str(soup)
         self.html_only_repository.update(html_only_document)
 
-        item.html_only_version_document_path = html_only_document.path
-        item.is_html_only_version_stored = True
+        item.html_only_document_path = html_only_document.path
+        item.is_html_only_stored = True
         self.index_repository.update(item)
 
         return {
@@ -76,7 +76,7 @@ class TransformHtmlToHtmlOnly(Base):
             items = self.index_repository.get_all()
         else:
             items = self.index_repository.get_all_by_filter({
-                IndexModel.is_html_only_version_stored: False
+                IndexModel.is_html_only_stored: False
             })
 
         self.run_concurrently_in_threads(items, max_threads=max_threads)

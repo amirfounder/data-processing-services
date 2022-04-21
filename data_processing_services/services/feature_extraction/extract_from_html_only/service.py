@@ -1,5 +1,5 @@
 from typing import Dict
-from csv import Di, DictWriter
+from csv import DictWriter
 
 from daos import (
     DocumentIndexModel,
@@ -49,7 +49,7 @@ class ExtractFromHtmlOnly(Base):
 
     def run(self, params: Dict):
         tasks = self.index_repository.get_all_by_filter({
-            DocumentIndexModel.is_html_only_version_stored: True
+            DocumentIndexModel.is_html_only_stored: True
         })
 
         self.run_concurrently_in_threads(tasks, max_threads=1)

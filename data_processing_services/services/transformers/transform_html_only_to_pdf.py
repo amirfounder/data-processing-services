@@ -39,8 +39,8 @@ class TransformHtmlOnlyToPdf(Base):
         pdf_doc.contents = pdf_contents
         self.pdf_repository.update(pdf_doc)
 
-        item.html_only_pdf_version_document_path = pdf_doc.path
-        item.is_html_only_pdf_version_stored = True
+        item.html_only_pdf_document_path = pdf_doc.path
+        item.is_html_only_pdf_stored = True
         self.index_repository.update(item)
 
         return {
@@ -57,8 +57,8 @@ class TransformHtmlOnlyToPdf(Base):
             items = self.index_repository.get_all()
         else:
             items = self.index_repository.get_all_by_filter({
-                Index.is_html_only_pdf_version_stored: False,
-                Index.is_html_only_version_stored: True
+                Index.is_html_only_pdf_stored: False,
+                Index.is_html_only_stored: True
             })
 
         self.run_concurrently_in_threads(items, max_threads=max_threads)

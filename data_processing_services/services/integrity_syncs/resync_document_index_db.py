@@ -50,22 +50,22 @@ class ResyncDocumentIndexDb(Base):
             return
 
         if raw_document := self.raw_html_repository.get(doc_id):
-            item.raw_html_version_document_path = raw_document.path
-            item.is_raw_html_version_stored = True
+            item.raw_html_document_path = raw_document.path
+            item.is_raw_html_stored = True
         else:
-            item.is_raw_html_version_stored = False
+            item.is_raw_html_stored = False
 
         if html_only_document := self.html_only_repository.get(doc_id):
-            item.html_only_version_document_path = html_only_document.path
-            item.is_html_only_version_stored = True
+            item.html_only_document_path = html_only_document.path
+            item.is_html_only_stored = True
         else:
-            item.is_html_only_version_stored = False
+            item.is_html_only_stored = False
 
         if html_only_pdf_document := self.html_only_pdf_repository.get(doc_id):
-            item.html_only_pdf_version_document_path = html_only_pdf_document.path
-            item.is_html_only_pdf_version_stored = True
+            item.html_only_pdf_document_path = html_only_pdf_document.path
+            item.is_html_only_pdf_stored = True
         else:
-            item.is_html_only_pdf_version_stored = False
+            item.is_html_only_pdf_stored = False
 
         self.index_repository.update(item)
         self.report.log_success({

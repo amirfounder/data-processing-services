@@ -38,8 +38,8 @@ class TransformRawHtmlToPdf(Base):
         pdf_doc.contents = pdf_contents
         self.pdf_repository.update(pdf_doc)
 
-        item.raw_html_pdf_version_document_path = pdf_doc.path
-        item.is_raw_html_pdf_version_stored = True
+        item.raw_html_pdf_document_path = pdf_doc.path
+        item.is_raw_html_pdf_stored = True
         self.index_repository.update(item)
 
         return {
@@ -55,7 +55,7 @@ class TransformRawHtmlToPdf(Base):
         items = self.index_repository.get_all() \
             if sync_all \
             else self.index_repository.get_all_by_filter({
-                Index.is_raw_html_pdf_version_stored: False
+                Index.is_raw_html_pdf_stored: False
             })
 
         self.run_concurrently_in_threads(items, max_threads=max_threads)

@@ -13,8 +13,8 @@ class DataPoint:
 
     def load_features(self):
         self.path_to_root = [self]
-        if (parent := self.tag.parent) in self.dataset.set:
-            self.path_to_root.extend(self.dataset.set[parent].path_to_root)
+        if (parent := self.tag.parent) in self.dataset.map:
+            self.path_to_root.extend(self.dataset.map[parent].path_to_root)
         else:
             self.path_to_root.append(DataPoint(self.dataset, 0, self.tag.parent))
 
@@ -34,13 +34,13 @@ class DataPoint:
 class DataSet:
     def __init__(self):
         self.next_id = 0
-        self.set: Dict[Tag, DataPoint] = {}
+        self.map: Dict[Tag, DataPoint] = {}
 
     def record(self, tag: Tag):
         self.next_id += 1
-        self.set[tag] = (point := DataPoint(self, self.next_id, tag))
+        self.map[tag] = (point := DataPoint(self, self.next_id, tag))
         return point
 
     def as_features_table(self):
-        return [x.get_features() for x in self.set.values()]
+        return [x.get_features() for x in self.map.values()]
 
