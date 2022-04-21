@@ -5,7 +5,7 @@ def threaded_try_except(func):
     def wrapper(self, task: Any):
         try:
 
-            summary = func(task)
+            summary = func(self, task)
 
             if summary:
                 summary['id'] = task.document_id
@@ -27,7 +27,7 @@ def try_except(func):
     def wrapper(self, task: Any):
         try:
 
-            summary = func(task)
+            summary = func(self, task)
 
             if summary:
                 summary['id'] = task.document_id

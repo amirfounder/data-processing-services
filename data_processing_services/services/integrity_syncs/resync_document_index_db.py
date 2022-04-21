@@ -7,8 +7,10 @@ from daos import (
     HtmlOnlyPdfDocumentRepository, DocumentIndexModel
 )
 
-from data_processing_services import threaded_try_except
-from data_processing_services.services.base.abstract_threaded import AbstractThreadedService as Base
+from ..base import (
+    AbstractThreadedService as Base,
+    threaded_try_except
+)
 
 
 class ResyncDocumentIndexDb(Base):

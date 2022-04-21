@@ -18,14 +18,15 @@ REPOSITORIES = [
 for cls in REPOSITORIES:
     service(cls)
 
-COMMON_SERVICES = [
+COMMONS_SERVICES = [
     PdfKit
 ]
 
-for cls in COMMON_SERVICES:
+for cls in COMMONS_SERVICES:
     service(cls)
 
 SERVICES_PARAMS = [
+    ('/extract-from-html-only', HttpMethod.POST, service(ExtractFromHtmlOnly)),
     ('/transform-raw-html-to-pdf', HttpMethod.POST, service(TransformRawHtmlToPdf)),
     ('/transform-html-to-html-only', HttpMethod.POST, service(TransformHtmlToHtmlOnly)),
     ('/transform-html-only-to-pdf', HttpMethod.POST, service(TransformHtmlOnlyToPdf)),
