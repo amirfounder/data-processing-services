@@ -5,7 +5,7 @@ from daos import (
     RawHtmlDocumentRepository as RawRepository,
     HtmlOnlyHtmlDocumentRepository as HtmlOnlyRepository,
     DocumentIndexRepository as IndexRepository,
-    DocumentIndexModel as IndexModel,
+    DocumentIndexModel as IndexModel, DocumentIndexModel,
 )
 
 from ..base import (
@@ -26,8 +26,8 @@ class TransformHtmlToHtmlOnly(Base):
         self.raw_repository = raw_repository
 
     @threaded_try_except
-    def run_in_thread(self, item):
-        raw_html_document = self.raw_repository.get(item.document_id)
+    def run_in_thread(self, task: DocumentIndexModel):
+        raw_html_document = self.raw_repository.get(task.document_id)
 
         if not raw_html_document:
             return
@@ -56,9 +56,9 @@ class TransformHtmlToHtmlOnly(Base):
         html_only_document.contents = str(soup)
         self.html_only_repository.update(html_only_document)
 
-        item.html_only_document_path = html_only_document.path
-        item.is_html_only_stored = True
-        self.index_repository.update(item)
+        task.html_only_document_path = html_only_document.path
+        task.is_html_only_stored = True
+        self.index_repository.update(task)
 
         return {
             'raw_html_path': raw_html_document.path,
@@ -73,11 +73,11 @@ class TransformHtmlToHtmlOnly(Base):
         max_threads = params.get('max_threads', 50)
 
         if sync_all:
-            items = self.index_repository.get_all()
+            tasks = self.index_repository.get_all()
         else:
-            items = self.index_repository.get_all_by_filter({
+            tasks = self.index_repository.get_all_by_filter({
                 IndexModel.is_html_only_stored: False
             })
 
-        self.run_concurrently_in_threads(items, max_threads=max_threads)
+        self.run_concurrently_in_threads(tasks, max_threads=max_threads)
         return self.complete()

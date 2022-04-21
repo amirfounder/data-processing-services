@@ -17,11 +17,13 @@ class Report:
 
     def log_success(self, summary: Dict):
         self.succeeded_count += 1
+        print(f'Success {self.succeeded_count}')
         summary['status'] = 'SUCCESS'
         self.summaries.append(summary)
 
     def log_failure(self, summary: Dict):
         self.failed_count += 1
+        print(f'Failed {self.failed_count}')
         summary['status'] = 'FAILED'
         self.summaries.append(summary)
 

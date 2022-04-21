@@ -30,21 +30,21 @@ class TransformHtmlOnlyToPdf(Base):
         self.pdfkit = pdfkit
 
     @threaded_try_except
-    def run_in_thread(self, item: DocumentIndexModel):
+    def run_in_thread(self, task: DocumentIndexModel):
 
-        html_doc = self.html_repository.get(item.document_id)
+        html_doc = self.html_repository.get(task.document_id)
         pdf_contents = self.pdfkit.from_file(html_doc.path)
 
         pdf_doc = self.pdf_repository.create(identifier=html_doc.id)
         pdf_doc.contents = pdf_contents
         self.pdf_repository.update(pdf_doc)
 
-        item.html_only_pdf_document_path = pdf_doc.path
-        item.is_html_only_pdf_stored = True
-        self.index_repository.update(item)
+        task.html_only_pdf_document_path = pdf_doc.path
+        task.is_html_only_pdf_stored = True
+        self.index_repository.update(task)
 
         return {
-            'id': item.document_id,
+            'id': task.document_id,
             'html_path': html_doc.path,
             'pdf_path': pdf_doc.path
         }
@@ -54,12 +54,12 @@ class TransformHtmlOnlyToPdf(Base):
         max_threads = params.get('max_threads', 50)
 
         if sync_all:
-            items = self.index_repository.get_all()
+            tasks = self.index_repository.get_all()
         else:
-            items = self.index_repository.get_all_by_filter({
+            tasks = self.index_repository.get_all_by_filter({
                 Index.is_html_only_pdf_stored: False,
                 Index.is_html_only_stored: True
             })
 
-        self.run_concurrently_in_threads(items, max_threads=max_threads)
+        self.run_concurrently_in_threads(tasks, max_threads=max_threads)
         return self.complete()

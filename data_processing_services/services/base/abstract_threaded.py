@@ -19,6 +19,7 @@ class AbstractThreadedService(AbstractService, ABC):
         return len([thread for thread in enumerate_threads() if thread.name == self.thread_name])
 
     def run_concurrently_in_threads(self, tasks: List[Any], max_threads: int = 50):
+        print(f'Starting concurrent run: {len(tasks)}')
         threads = []
 
         for item in tasks:

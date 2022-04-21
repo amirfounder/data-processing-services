@@ -2,33 +2,36 @@ from __future__ import annotations
 
 from typing import Dict
 
-from bs4.element import Tag
+from bs4.element import Tag, NavigableString
 
 
 class DataPoint:
     def __init__(self, dataset: DataSet, _id, tag: Tag):
         self.dataset = dataset
         self.id = _id
-        self.tag = tag
+        self._tag = tag
+        self._tag['_id'] = _id
 
     def load_features(self):
-        self.path_to_root = [self]
-        if (parent := self.tag.parent) in self.dataset.map:
-            self.path_to_root.extend(self.dataset.map[parent].path_to_root)
-        else:
-            self.path_to_root.append(DataPoint(self.dataset, 0, self.tag.parent))
+        self.tag = self._tag.name
+        self.id_path = [self._tag.attrs['_id'], *[x.attrs.get('_id', '0') for x in self._tag.parents]]
+        self.tag_path = [
+            self._tag.name, *[(x.name if x.name != '[document]' else 'document') for x in self._tag.parents]]
+        self.text = self._tag.text
+        self.node_only_texts = [str(child) for child in self._tag.contents if isinstance(child, NavigableString)]
+        self.node_only_text = ''.join(self.node_only_texts)
 
-        self.path_to_root_with_ids = [x.id for x in self.path_to_root]
-        self.path_to_root_with_tag_names = [x.tag.name for x in self.path_to_root]
-
-    def get_features(self):
-        return {
-            'ids_path': self.path_to_root_with_ids,
-            'tag_names_path': self.path_to_root_with_tag_names,
+    def load_feature_set_v1(self):
+        self.feature_set_v1 = {
             'id': self.id,
-            'tag_name': self.tag.name,
-            'content': self.tag.contents,
+            'id_path': self.id_path,
+            'tag_path': self.tag_path,
+            'tag': self.tag,
+            'text': self.text,
+            'node_only_texts': self.node_only_texts,
+            'node_only_text': self.node_only_text
         }
+        return self.feature_set_v1
 
 
 class DataSet:
@@ -42,5 +45,5 @@ class DataSet:
         return point
 
     def as_features_table(self):
-        return [x.get_features() for x in self.map.values()]
+        return [x.load_feature_set_v1() for x in self.map.values()]
 

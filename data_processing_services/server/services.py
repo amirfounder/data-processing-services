@@ -12,7 +12,8 @@ REPOSITORIES = [
     HtmlOnlyPdfDocumentRepository,
     HtmlOnlyHtmlDocumentRepository,
     RawHtmlDocumentRepository,
-    RawHtmlPdfDocumentRepository
+    RawHtmlPdfDocumentRepository,
+    HtmlOnlyHtmlDocumentFeaturesRepository
 ]
 
 for cls in REPOSITORIES:
