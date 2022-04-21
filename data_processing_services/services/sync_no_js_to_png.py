@@ -1,6 +1,6 @@
 from typing import Dict
 
-import imgkit
+import pdfkit
 
 from daos import (
     GoogleSearchResultsHtmlDocumentNoJSRepository as NoJsRepository,
@@ -19,7 +19,7 @@ class SyncNoJsToPng(Base):
         super().__init__()
         self.no_js_repository = no_js_repository
         self.index_repository = index_repository
-        self.imgkit_config = imgkit.config(wkhtmltoimage=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltoimage.exe')
+        self.imgkit_config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
         self.imgkit_options = {
             "enable-local-file-access": None
         }
@@ -28,10 +28,10 @@ class SyncNoJsToPng(Base):
         try:
 
             html_doc = self.no_js_repository.get(item.document_id)
-            html_img = imgkit.from_file(
+            html_img = pdfkit.from_file(
                 html_doc.path,
-                'lol.png',
-                config=self.imgkit_config,
+                'lol.pdf',
+                configuration=self.imgkit_config,
                 options=self.imgkit_options
             )
 

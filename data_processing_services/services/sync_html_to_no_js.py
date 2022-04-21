@@ -48,15 +48,6 @@ class SyncHtmlToNoJs(Base):
                 #             attr_values_removed += 1
                 #     tag.attrs = clean_copy
 
-                attr_values_removed = 0
-                for tag in soup.find_all():
-                    if attrs := getattr(tag, 'attrs', None):
-                        for k, v in attrs.items():
-                            if '://' in v:
-                                tag.decompose()
-                                attr_values_removed += 1
-                                break
-
                 no_js_document = self.no_js_repository.create(id=raw_document.id)
                 no_js_document.contents = str(soup)
                 self.no_js_repository.update(no_js_document)
@@ -85,12 +76,16 @@ class SyncHtmlToNoJs(Base):
     def run(self, params: Dict):
         sync_all = params.get('sync_all', False)
         max_threads = params.get('max_threads', 50)
+        max_items_to_process = params.get('max_items_to_process', None)
 
         items = self.index_repository.get_all() \
             if sync_all \
             else self.index_repository.get_all_by_filter({
                 Index.is_no_js_version_stored: False
             })
+
+        if max_items_to_process:
+            items = items[:max_items_to_process]
 
         self._run_concurrently_in_threads(items, max_threads=max_threads)
         return self.complete()
