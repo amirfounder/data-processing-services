@@ -33,10 +33,10 @@ for cls in COMMONS_SERVICES:
     service(cls)
 
 SERVICES_PARAMS = [
-    ('/extract-from-html-only', HttpMethod.POST, service(ExtractFromProcessedHtmlV1)),
+    ('/extract-from-processed-html-v1', HttpMethod.POST, service(ExtractFromProcessedHtmlV1)),
     ('/transform-raw-html-to-pdf', HttpMethod.POST, service(TransformRawHtmlToPdf)),
-    ('/transform-html-to-html-only', HttpMethod.POST, service(TransformHtmlToProcessedHtmlV1)),
-    ('/transform-html-only-to-pdf', HttpMethod.POST, service(TransformProcessedHtmlV1ToPdf)),
+    ('/transform-html-to-processed-html-v1', HttpMethod.POST, service(TransformHtmlToProcessedHtmlV1)),
+    ('/transform-processed-html-v1-to-pdf', HttpMethod.POST, service(TransformProcessedHtmlV1ToPdf)),
     ('/sync-document-index-db', HttpMethod.POST, service(SyncDocumentIndexDb))
 ]
 
