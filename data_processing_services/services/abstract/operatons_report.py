@@ -1,3 +1,4 @@
+from math import inf
 from typing import Dict
 
 
@@ -22,7 +23,7 @@ class OperationsReport:
 
     def complete(self):
         self.status = 'COMPLETE'
-        self.summaries.sort(key=lambda s: s.get('id'))
+        self.summaries.sort(key=lambda s: s.get('id', inf))
         return self.as_dict()
 
     def as_dict(self):

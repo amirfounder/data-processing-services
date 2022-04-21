@@ -77,11 +77,14 @@ class SyncHtmlToHtmlOnly(Base):
                 })
 
     def run(self, params: Dict):
+        sync_all = params.get('sync_all', False)
+        max_threads = params.get('max_threads', 50)
+
         items = self.index_repository.get_all() \
-            if params.get('sync_all', False) \
+            if sync_all \
             else self.index_repository.get_all_by_filter({
                 Index.is_html_only_version_stored: False
             })
 
-        self._run_concurrently_in_threads(items)
+        self._run_concurrently_in_threads(items, max_threads=max_threads)
         return self.complete()

@@ -38,14 +38,24 @@ class SyncHtmlToNoJs(Base):
                     tag.decompose()
                     script_tags_removed += 1
 
+                # attr_values_removed = 0
+                # for tag in soup.find_all():
+                #     clean_copy = {}
+                #     for k, v in tag.attrs.items():
+                #         if '://' not in v:
+                #             clean_copy[k] = v
+                #         else:
+                #             attr_values_removed += 1
+                #     tag.attrs = clean_copy
+
                 attr_values_removed = 0
                 for tag in soup.find_all():
-                    attrs_copy = {}
-                    for k, v in tag.attrs.items():
-                        if '://' not in v:
-                            attrs_copy[k] = v
-                        else:
-                            attr_values_removed += 1
+                    if attrs := getattr(tag, 'attrs', None):
+                        for k, v in attrs.items():
+                            if '://' in v:
+                                tag.decompose()
+                                attr_values_removed += 1
+                                break
 
                 no_js_document = self.no_js_repository.create(id=raw_document.id)
                 no_js_document.contents = str(soup)
@@ -73,11 +83,14 @@ class SyncHtmlToNoJs(Base):
                 })
 
     def run(self, params: Dict):
+        sync_all = params.get('sync_all', False)
+        max_threads = params.get('max_threads', 50)
+
         items = self.index_repository.get_all() \
-            if params.get('sync_all') \
+            if sync_all \
             else self.index_repository.get_all_by_filter({
-                Index.is_html_only_version_stored: True
+                Index.is_no_js_version_stored: False
             })
 
-        self._run_concurrently_in_threads(items)
+        self._run_concurrently_in_threads(items, max_threads=max_threads)
         return self.complete()
