@@ -57,7 +57,7 @@ class SyncHtmlToNoJs(Base):
                 self.index_repository.update(item)
 
                 with self.lock:
-                    self.operations_report.log_success({
+                    self.service_report.log_success({
                         'id': item.document_id,
                         'script_tags_removed': script_tags_removed,
                         'attrs_values_removed': {
@@ -69,7 +69,7 @@ class SyncHtmlToNoJs(Base):
             print(f'Exception occurred : {str(e)}. Document ID : {item.document_id}')
 
             with self.lock:
-                self.operations_report.log_failure({
+                self.service_report.log_failure({
                     'reason': str(e)
                 })
 

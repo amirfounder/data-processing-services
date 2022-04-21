@@ -3,45 +3,35 @@ from typing import Dict
 import pdfkit
 
 from daos import (
-    GoogleSearchResultsHtmlDocumentNoJSRepository as NoJsRepository,
+    GoogleSearchResultsHtmlDocumentHtmlOnlyRepository as HtmlOnlyRepository,
     GoogleSearchResultsHtmlDocumentIndexRepository as IndexRepository,
     HtmlDocumentIndexItem as Index,
 )
 
 from .abstract import AbstractMultiThreadedDataProcessingService as Base
 
-class SyncNoJsToPng(Base):
+class SyncHtmlOnlyToPdf(Base):
     def __init__(
             self,
-            no_js_repository: NoJsRepository,
+            html_only_repository: HtmlOnlyRepository,
             index_repository: IndexRepository,
     ):
         super().__init__()
-        self.no_js_repository = no_js_repository
+        self.html_only_repository = html_only_repository
         self.index_repository = index_repository
-        self.imgkit_config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
-        self.imgkit_options = {
-            "enable-local-file-access": None
-        }
+        self.pdfkit_config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
 
     def _run_in_thread(self, item):
         try:
 
-            html_doc = self.no_js_repository.get(item.document_id)
-            html_img = pdfkit.from_file(
-                html_doc.path,
-                'lol.pdf',
-                configuration=self.imgkit_config,
-                options=self.imgkit_options
-            )
-
-            print('lol')
+            html_doc = self.html_only_repository.get(item.document_id)
+            html_pdf = pdfkit.from_file(html_doc.path, 'lol.pdf', configuration=self.pdfkit_config)
 
         except Exception as e:
             print(f'Exception occurred : {str(e)}. Document ID : {item.document_id}')
 
             with self.lock:
-                self.operations_report.log_failure({
+                self.service_report.log_failure({
                     'reason': str(e)
                 })
 

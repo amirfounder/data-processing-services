@@ -2,7 +2,7 @@ from math import inf
 from typing import Dict
 
 
-class OperationsReport:
+class ServiceReport:
     def __init__(self):
         self.status = 'RUNNING'
         self.succeeded_count = 0

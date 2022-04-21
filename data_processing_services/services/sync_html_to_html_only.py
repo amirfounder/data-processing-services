@@ -60,7 +60,7 @@ class SyncHtmlToHtmlOnly(Base):
             self.index_repository.update(item)
 
             with self.lock:
-                self.operations_report.log_success({
+                self.service_report.log_success({
                     'id': item.document_id,
                     'raw_path': raw_document.path,
                     'html_only_path': html_only_document.path,
@@ -72,7 +72,7 @@ class SyncHtmlToHtmlOnly(Base):
         except Exception as e:
             print(f'Exception occurred : {str(e)}. Document ID : {item.document_id}')
             with self.lock:
-                self.operations_report.log_failure({
+                self.service_report.log_failure({
                     'reason': str(e)
                 })
 

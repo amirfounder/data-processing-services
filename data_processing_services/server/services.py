@@ -23,7 +23,7 @@ for cls in REPOSITORIES:
 SERVICES_PARAMS = [
     ('/sync-html-to-no-js', HttpMethod.POST, service(SyncHtmlToNoJs)),
     ('/sync-html-to-html-only', HttpMethod.POST, service(SyncHtmlToHtmlOnly)),
-    ('/sync-no-js-to-png', HttpMethod.POST, service(SyncNoJsToPng))
+    ('/sync-html-only-to-pdf', HttpMethod.POST, service(SyncHtmlOnlyToPdf))
 ]
 
 SERVICES = [ServiceAdapter(r, m, s()) for r, m, s in SERVICES_PARAMS]

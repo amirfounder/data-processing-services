@@ -2,7 +2,7 @@ from __future__ import annotations
 from abc import abstractmethod, ABC
 from typing import Dict
 
-from data_processing_services.services.abstract.operatons_report import OperationsReport
+from data_processing_services.services.abstract.service_report import ServiceReport
 
 TRUNCATED_LENGTH = 50
 
@@ -12,11 +12,11 @@ class AbstractDataProcessingService(ABC):
 
     def __new__(cls, *args, **kwargs):
         cls.service_id = cls.__name__
-        cls.operations_report = OperationsReport()
+        cls.service_report = ServiceReport()
         return super().__new__(cls, *args, **kwargs)
 
     def complete(self):
-        return self.operations_report.complete()
+        return self.service_report.complete()
 
     @abstractmethod
     def run(self, params: Dict):
