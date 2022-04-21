@@ -1,12 +1,11 @@
-import threading
 from copy import copy
 from typing import Dict
 
 from daos import (
-    GoogleSearchResultsHtmlDocumentRawRepository as RawRepository,
-    GoogleSearchResultsHtmlDocumentHtmlOnlyRepository as HtmlOnlyRepository,
-    GoogleSearchResultsHtmlDocumentIndexRepository as IndexRepository,
-    HtmlDocumentIndexItem as Index,
+    RawHtmlDocumentRepository as RawRepository,
+    HtmlOnlyHtmlDocumentRepository as HtmlOnlyRepository,
+    DocumentIndexRepository as IndexRepository,
+    DocumentIndexModel as IndexModel,
 )
 
 from .abstract import AbstractMultiThreadedDataProcessingService as Base
@@ -83,7 +82,7 @@ class SyncHtmlToHtmlOnly(Base):
         items = self.index_repository.get_all() \
             if sync_all \
             else self.index_repository.get_all_by_filter({
-                Index.is_html_only_version_stored: False
+                IndexModel.is_html_only_version_stored: False
             })
 
         self._run_concurrently_in_threads(items, max_threads=max_threads)

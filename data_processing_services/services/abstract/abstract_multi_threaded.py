@@ -1,6 +1,6 @@
 import threading
 from abc import ABC, abstractmethod
-from threading import active_count, Thread, Lock
+from threading import Thread, Lock
 from time import sleep
 from typing import Any, List
 
@@ -8,9 +8,9 @@ from .abstract import AbstractDataProcessingService
 
 
 class AbstractMultiThreadedDataProcessingService(AbstractDataProcessingService, ABC):
-    def __init__(self):
-        super().__init__()
-        self.lock = Lock()
+    def __new__(cls, *args, **kwargs):
+        cls.lock = Lock()
+        return super().__new__(cls, *args, **kwargs)
 
     @abstractmethod
     def _run_in_thread(self, item: Any):

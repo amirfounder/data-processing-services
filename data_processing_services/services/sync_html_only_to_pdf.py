@@ -1,11 +1,12 @@
 from typing import Dict
 
-import pdfkit
+from commons import PdfKit
 
 from daos import (
-    GoogleSearchResultsHtmlDocumentHtmlOnlyRepository as HtmlOnlyRepository,
-    GoogleSearchResultsHtmlDocumentIndexRepository as IndexRepository,
-    HtmlDocumentIndexItem as Index,
+    HtmlOnlyHtmlDocumentRepository as HtmlRepository,
+    HtmlOnlyPdfDocumentRepository as PdfRepository,
+    DocumentIndexRepository as IndexRepository,
+    DocumentIndexModel as Index,
 )
 
 from .abstract import AbstractMultiThreadedDataProcessingService as Base
@@ -13,19 +14,22 @@ from .abstract import AbstractMultiThreadedDataProcessingService as Base
 class SyncHtmlOnlyToPdf(Base):
     def __init__(
             self,
-            html_only_repository: HtmlOnlyRepository,
+            pdfkit: PdfKit,
+            html_repository: HtmlRepository,
+            pdf_repository: PdfRepository,
             index_repository: IndexRepository,
     ):
         super().__init__()
-        self.html_only_repository = html_only_repository
+        self.html_repository = html_repository
+        self.pdf_repository = pdf_repository
         self.index_repository = index_repository
-        self.pdfkit_config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
+        self.pdfkit = pdfkit
 
     def _run_in_thread(self, item):
         try:
 
-            html_doc = self.html_only_repository.get(item.document_id)
-            html_pdf = pdfkit.from_file(html_doc.path, 'lol.pdf', configuration=self.pdfkit_config)
+            html_doc = self.html_repository.get(item.document_id)
+            html_pdf = self.pdfkit.from_file(html_doc.path)
 
         except Exception as e:
             print(f'Exception occurred : {str(e)}. Document ID : {item.document_id}')
@@ -42,7 +46,7 @@ class SyncHtmlOnlyToPdf(Base):
         items = self.index_repository.get_all() \
             if sync_all \
             else self.index_repository.get_all_by_filter({
-                Index.is_no_js_version_stored: True
+                Index.is_pdf_version_stored: False
             })
 
         self._run_concurrently_in_threads(items, max_threads=max_threads)
