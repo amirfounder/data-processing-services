@@ -15,16 +15,9 @@ class DataPoint:
     def load_features(self):
         self.name = str(self.tag.name)
         self.id_path = [self.tag.attrs['_id'], *[x.attrs.get('_id', 0) for x in self.tag.parents]]
-        self.tag_path = [
-            self.tag.name, *[(x.name if x.name != '[document]' else 'document') for x in self.tag.parents]]
-        self.text = self.tag.text if self.name not in ['style', 'body'] else None
-        self.node_only_texts = [
-            str(c) for c in self.tag.contents if
-            (
-                isinstance(c, NavigableString) and
-                self.tag.name not in ['style', 'body']
-            )
-        ]
+        self.tag_path = [self.tag.name, *[(x.name if x.name != '[document]' else 'document') for x in self.tag.parents]]
+        self.text = self.tag.text
+        self.node_only_texts = [str(c) for c in self.tag.contents if isinstance(c, NavigableString)]
         self.node_only_text = ' '.join(self.node_only_texts)
 
     def load_feature_set_v1(self):

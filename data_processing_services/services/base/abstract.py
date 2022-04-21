@@ -14,7 +14,7 @@ class AbstractService(ABC):
         return super().__new__(cls, *args, **kwargs)
 
     def complete(self):
-        report = self.report.finalize()
+        report = self.report.complete()
         self.report.reset()
         return report
 

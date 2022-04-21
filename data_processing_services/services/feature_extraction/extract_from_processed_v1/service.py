@@ -7,7 +7,7 @@ from daos import (
     ProcessedHtmlV1DocumentFeaturesRepository
 )
 
-from .dataset import DataSet
+from data_processing_services.services.feature_extraction.extract_from_processed_v1.models.dataset import DataSet
 from ...base import (
     AbstractThreadedService as Base,
     threaded_try_except

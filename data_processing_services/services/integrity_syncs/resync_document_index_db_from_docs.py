@@ -13,7 +13,7 @@ from ..base import (
 )
 
 
-class ResyncDocumentIndexDb(Base):
+class SyncDocumentIndexDb(Base):
     def __init__(self, index_repository: DocumentIndexRepository, raw_html_repository: RawHtmlDocumentRepository,
                  processed_html_v1_repository: ProcessedHtmlV1DocumentRepository,
                  processed_html_v1_pdf_repository: ProcessedHtmlV1PdfDocumentRepository):
@@ -66,5 +66,12 @@ class ResyncDocumentIndexDb(Base):
 
         tasks = self.index_repository.get_all()
         self.run_concurrently_in_threads(tasks, max_threads=max_threads)
+
+        task_doc_ids = [str(task.document_id) for task in tasks]
+        raw_html_docs = self.raw_html_repository.get_all()
+        raw_html_docs_to_delete = [doc for doc in raw_html_docs if doc.id not in task_doc_ids]
+
+        for doc in raw_html_docs_to_delete:
+            self.raw_html_repository.delete(doc.id)
 
         return self.report.complete()

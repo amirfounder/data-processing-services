@@ -37,10 +37,17 @@ class TransformHtmlToProcessedHtmlV1(Base):
 
         soup = copy(raw_html_document.soup)
 
-        attributes_removed = 0
+        attributes_partly_removed = 0
+        attributes_fully_removed = 0
         for tag in soup.find_all():
-            tag.attrs.clear()
-            attributes_removed += 1
+            if tag.name == 'a' and 'href' in tag.attrs:
+                href = tag.attrs['href']
+                tag.attrs.clear()
+                tag['href'] = href
+                attributes_partly_removed += 1
+            else:
+                tag.attrs.clear()
+                attributes_fully_removed += 1
 
         head_tags_removed = 0
         for tag in soup.select('head'):
@@ -52,6 +59,11 @@ class TransformHtmlToProcessedHtmlV1(Base):
             tag.decompose()
             script_tags_removed += 1
 
+        style_tags_removed = 0
+        for tag in soup.select('style'):
+            tag.decompose()
+            style_tags_removed += 1
+
         processed_html_v1_document = self.processed_html_v1_repository.create(identifier=raw_html_document.id)
         processed_html_v1_document.contents = str(soup)
         self.processed_html_v1_repository.update(processed_html_v1_document)
@@ -61,11 +73,12 @@ class TransformHtmlToProcessedHtmlV1(Base):
         self.index_repository.update(task)
 
         return {
-            'raw_html_path': raw_html_document.path,
             'processed_html_v1_path': processed_html_v1_document.path,
             'script_tags_removed': script_tags_removed,
             'head_tags_removed': head_tags_removed,
-            'attributes_removed': attributes_removed
+            'style_tags_removed': style_tags_removed,
+            'attributes_fully_removed': attributes_fully_removed,
+            'attributes_partly_removed': attributes_partly_removed
         }
 
     def run(self, params: Dict):

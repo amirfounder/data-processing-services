@@ -1,1 +1,1 @@
-from .resync_document_index_db import ResyncDocumentIndexDb
+from .resync_document_index_db_from_docs import SyncDocumentIndexDb

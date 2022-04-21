@@ -10,7 +10,7 @@ from data_processing_services.services import (
     TransformRawHtmlToPdf,
     TransformHtmlToProcessedHtmlV1,
     TransformProcessedHtmlV1ToPdf,
-    ResyncDocumentIndexDb
+    SyncDocumentIndexDb
 )
 
 REPOSITORIES = [
@@ -37,7 +37,7 @@ SERVICES_PARAMS = [
     ('/transform-raw-html-to-pdf', HttpMethod.POST, service(TransformRawHtmlToPdf)),
     ('/transform-html-to-html-only', HttpMethod.POST, service(TransformHtmlToProcessedHtmlV1)),
     ('/transform-html-only-to-pdf', HttpMethod.POST, service(TransformProcessedHtmlV1ToPdf)),
-    ('/resync-document-index-db', HttpMethod.POST, service(ResyncDocumentIndexDb))
+    ('/sync-document-index-db', HttpMethod.POST, service(SyncDocumentIndexDb))
 ]
 
 SERVICES = [ServiceAdapter(r, m, s()) for r, m, s in SERVICES_PARAMS]

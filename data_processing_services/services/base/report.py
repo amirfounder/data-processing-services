@@ -27,7 +27,7 @@ class Report:
         summary['status'] = 'FAILED'
         self.summaries.append(summary)
 
-    def finalize(self):
+    def complete(self):
         self.status = 'COMPLETE'
         self.summaries.sort(key=lambda s: s.get('id', inf))
         return self.as_dict()
