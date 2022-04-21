@@ -3,8 +3,8 @@ from typing import Dict
 from daos import (
     DocumentIndexRepository,
     RawHtmlDocumentRepository,
-    HtmlOnlyHtmlDocumentRepository,
-    HtmlOnlyPdfDocumentRepository, DocumentIndexModel
+    ProcessedHtmlV1DocumentRepository,
+    ProcessedHtmlV1PdfDocumentRepository, DocumentIndexModel
 )
 
 from ..base import (
@@ -15,13 +15,13 @@ from ..base import (
 
 class ResyncDocumentIndexDb(Base):
     def __init__(self, index_repository: DocumentIndexRepository, raw_html_repository: RawHtmlDocumentRepository,
-                 html_only_repository: HtmlOnlyHtmlDocumentRepository,
-                 html_only_pdf_repository: HtmlOnlyPdfDocumentRepository):
+                 processed_html_v1_repository: ProcessedHtmlV1DocumentRepository,
+                 processed_html_v1_pdf_repository: ProcessedHtmlV1PdfDocumentRepository):
         super().__init__()
         self.index_repository = index_repository
         self.raw_html_repository = raw_html_repository
-        self.html_only_repository = html_only_repository
-        self.html_only_pdf_repository = html_only_pdf_repository
+        self.processed_html_v1_repository = processed_html_v1_repository
+        self.processed_html_v1_pdf_repository = processed_html_v1_pdf_repository
 
     @threaded_try_except
     def run_in_thread(self, task: DocumentIndexModel):
@@ -30,11 +30,7 @@ class ResyncDocumentIndexDb(Base):
 
         if not url:
             self.index_repository.delete(task.id)
-            self.report.log_failure({
-                'id': task.document_id,
-                'reason': 'No URL present. Could not clean further. Removing task from index ...'
-            })
-            return
+            raise Exception('No URL present. Could not clean further. Removing task from index ...')
 
         if 'google.com/search?q=' in url:
             task.is_type_google_search_results = True
@@ -43,11 +39,7 @@ class ResyncDocumentIndexDb(Base):
             task.is_type_google_search_results = False
 
         if not doc_id:
-            self.report.log_failure({
-                'id': task.document_id,
-                'reason': 'No doc_id present. Could not clean further'
-            })
-            return
+            raise Exception('No doc_id present. Could not clean further')
 
         if raw_document := self.raw_html_repository.get(doc_id):
             task.raw_html_document_path = raw_document.path
@@ -55,22 +47,19 @@ class ResyncDocumentIndexDb(Base):
         else:
             task.is_raw_html_stored = False
 
-        if html_only_document := self.html_only_repository.get(doc_id):
-            task.html_only_document_path = html_only_document.path
-            task.is_html_only_stored = True
+        if processed_html_v1_document := self.processed_html_v1_repository.get(doc_id):
+            task.processed_html_v1_document_path = processed_html_v1_document.path
+            task.is_processed_html_v1_stored = True
         else:
-            task.is_html_only_stored = False
+            task.is_processed_html_v1_stored = False
 
-        if html_only_pdf_document := self.html_only_pdf_repository.get(doc_id):
-            task.html_only_pdf_document_path = html_only_pdf_document.path
-            task.is_html_only_pdf_stored = True
+        if processed_html_v1_pdf_document := self.processed_html_v1_pdf_repository.get(doc_id):
+            task.processed_html_v1_pdf_document_path = processed_html_v1_pdf_document.path
+            task.is_processed_html_v1_pdf_stored = True
         else:
-            task.is_html_only_pdf_stored = False
+            task.is_processed_html_v1_pdf_stored = False
 
         self.index_repository.update(task)
-        self.report.log_success({
-            'id': task.document_id
-        })
 
     def run(self, params: Dict):
         max_threads = params.get('max_threads', 50)

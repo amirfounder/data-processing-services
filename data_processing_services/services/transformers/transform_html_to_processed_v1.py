@@ -3,7 +3,7 @@ from typing import Dict
 
 from daos import (
     RawHtmlDocumentRepository as RawRepository,
-    HtmlOnlyHtmlDocumentRepository as HtmlOnlyRepository,
+    ProcessedHtmlV1DocumentRepository as ProcessedHtmlV1Repository,
     DocumentIndexRepository as IndexRepository,
     DocumentIndexModel as IndexModel, DocumentIndexModel,
 )
@@ -13,15 +13,15 @@ from ..base import (
     AbstractThreadedService as Base
 )
 
-class TransformHtmlToHtmlOnly(Base):
+class TransformHtmlToProcessedHtmlV1(Base):
     def __init__(
             self,
-            html_only_repository: HtmlOnlyRepository,
+            processed_html_v1_repository: ProcessedHtmlV1Repository,
             index_repository: IndexRepository,
             raw_repository: RawRepository
     ):
         super().__init__()
-        self.html_only_repository = html_only_repository
+        self.processed_html_v1_repository = processed_html_v1_repository
         self.index_repository = index_repository
         self.raw_repository = raw_repository
 
@@ -52,17 +52,17 @@ class TransformHtmlToHtmlOnly(Base):
             tag.decompose()
             script_tags_removed += 1
 
-        html_only_document = self.html_only_repository.create(identifier=raw_html_document.id)
-        html_only_document.contents = str(soup)
-        self.html_only_repository.update(html_only_document)
+        processed_html_v1_document = self.processed_html_v1_repository.create(identifier=raw_html_document.id)
+        processed_html_v1_document.contents = str(soup)
+        self.processed_html_v1_repository.update(processed_html_v1_document)
 
-        task.html_only_document_path = html_only_document.path
-        task.is_html_only_stored = True
+        task.processed_html_v1_document_path = processed_html_v1_document.path
+        task.is_processed_html_v1_stored = True
         self.index_repository.update(task)
 
         return {
             'raw_html_path': raw_html_document.path,
-            'html_only_path': html_only_document.path,
+            'processed_html_v1_path': processed_html_v1_document.path,
             'script_tags_removed': script_tags_removed,
             'head_tags_removed': head_tags_removed,
             'attributes_removed': attributes_removed
@@ -76,7 +76,7 @@ class TransformHtmlToHtmlOnly(Base):
             tasks = self.index_repository.get_all()
         else:
             tasks = self.index_repository.get_all_by_filter({
-                IndexModel.is_html_only_stored: False
+                IndexModel.is_processed_html_v1_stored: False
             })
 
         self.run_concurrently_in_threads(tasks, max_threads=max_threads)

@@ -1,1 +1,1 @@
-from .extract_from_html_only import ExtractFromHtmlOnly
+from .extract_from_processed_v1 import ExtractFromProcessedHtmlV1

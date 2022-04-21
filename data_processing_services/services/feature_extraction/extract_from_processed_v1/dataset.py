@@ -9,24 +9,30 @@ class DataPoint:
     def __init__(self, dataset: DataSet, _id, tag: Tag):
         self.dataset = dataset
         self.id = _id
-        self._tag = tag
-        self._tag['_id'] = _id
+        self.tag = tag
+        self.tag['_id'] = _id
 
     def load_features(self):
-        self.tag = self._tag.name
-        self.id_path = [self._tag.attrs['_id'], *[x.attrs.get('_id', '0') for x in self._tag.parents]]
+        self.name = str(self.tag.name)
+        self.id_path = [self.tag.attrs['_id'], *[x.attrs.get('_id', 0) for x in self.tag.parents]]
         self.tag_path = [
-            self._tag.name, *[(x.name if x.name != '[document]' else 'document') for x in self._tag.parents]]
-        self.text = self._tag.text
-        self.node_only_texts = [str(child) for child in self._tag.contents if isinstance(child, NavigableString)]
-        self.node_only_text = ''.join(self.node_only_texts)
+            self.tag.name, *[(x.name if x.name != '[document]' else 'document') for x in self.tag.parents]]
+        self.text = self.tag.text if self.name not in ['style', 'body'] else None
+        self.node_only_texts = [
+            str(c) for c in self.tag.contents if
+            (
+                isinstance(c, NavigableString) and
+                self.tag.name not in ['style', 'body']
+            )
+        ]
+        self.node_only_text = ' '.join(self.node_only_texts)
 
     def load_feature_set_v1(self):
         self.feature_set_v1 = {
             'id': self.id,
             'id_path': self.id_path,
             'tag_path': self.tag_path,
-            'tag': self.tag,
+            'tag': self.name,
             'text': self.text,
             'node_only_texts': self.node_only_texts,
             'node_only_text': self.node_only_text

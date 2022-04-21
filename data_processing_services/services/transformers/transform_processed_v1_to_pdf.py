@@ -3,8 +3,8 @@ from typing import Dict
 from commons import PdfKit
 
 from daos import (
-    HtmlOnlyHtmlDocumentRepository as HtmlRepository,
-    HtmlOnlyPdfDocumentRepository as PdfRepository,
+    ProcessedHtmlV1DocumentRepository as HtmlRepository,
+    ProcessedHtmlV1PdfDocumentRepository as PdfRepository,
     DocumentIndexRepository as IndexRepository,
     DocumentIndexModel as Index, DocumentIndexModel,
 )
@@ -15,7 +15,7 @@ from ..base import (
 )
 
 
-class TransformHtmlOnlyToPdf(Base):
+class TransformProcessedHtmlV1ToPdf(Base):
     def __init__(
             self,
             pdfkit: PdfKit,
@@ -39,8 +39,8 @@ class TransformHtmlOnlyToPdf(Base):
         pdf_doc.contents = pdf_contents
         self.pdf_repository.update(pdf_doc)
 
-        task.html_only_pdf_document_path = pdf_doc.path
-        task.is_html_only_pdf_stored = True
+        task.processed_html_v1_pdf_document_path = pdf_doc.path
+        task.is_processed_html_v1_pdf_stored = True
         self.index_repository.update(task)
 
         return {
@@ -57,8 +57,8 @@ class TransformHtmlOnlyToPdf(Base):
             tasks = self.index_repository.get_all()
         else:
             tasks = self.index_repository.get_all_by_filter({
-                Index.is_html_only_pdf_stored: False,
-                Index.is_html_only_stored: True
+                Index.is_processed_html_v1_pdf_stored: False,
+                Index.is_processed_html_v1_stored: True
             })
 
         self.run_concurrently_in_threads(tasks, max_threads=max_threads)

@@ -5,12 +5,11 @@ def threaded_try_except(func):
     def wrapper(self, task: Any):
         try:
 
-            summary = func(self, task)
+            summary = func(self, task) or {}
+            summary['id'] = task.document_id
 
-            if summary:
-                summary['id'] = task.document_id
-                with self.lock:
-                    self.report.log_success(summary)
+            with self.lock:
+                self.report.log_success(summary)
 
         except Exception as e:
             print(f'Exception occurred : {str(e)}. Document ID : {task.document_id}')
@@ -27,11 +26,10 @@ def try_except(func):
     def wrapper(self, task: Any):
         try:
 
-            summary = func(self, task)
+            summary = func(self, task) or {}
+            summary['id'] = task.document_id
 
-            if summary:
-                summary['id'] = task.document_id
-                self.report.log_success(summary)
+            self.report.log_success(summary)
 
         except Exception as e:
             print(f'Exception occurred : {str(e)}. Document ID : {task.document_id}')
